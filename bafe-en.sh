@@ -149,7 +149,6 @@ while true; do
             ;;
         q)  # Quit
             echo "Exiting BAFE. Goodbye!"
-            exit 0
             ;;
         h)  # Help
             show_help
