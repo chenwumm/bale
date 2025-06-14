@@ -1,10 +1,5 @@
 #!/bin/bash
-echo ' ____               ______   ______
- |  _ \      /\     |  ____| |  ____|
- | |_) |    /  \    | |__    | |__
- |  _ <    / /\ \   |  __|   |  __|
- | |_) |  / ____ \  | |      | |____
- |____/  /_/    \_\ |_|      |______|
+echo ' ____       _      _       _____                                       | __ )     / \    | |     | ____|                                      |  _ \    / _ \   | |     |  _|                                        | |_) |  / ___ \  | |___  | |___                                       |____/  /_/   \_\ |_____| |_____|
 '
 
 file_content=()
@@ -26,7 +21,7 @@ if [ $# -ge 1 ]; then
 fi
 
 show_help() {
-    echo "?BAFE Line Editor - Help Manual"
+    echo "?BALE Line Editor - Help Manual"
     echo " Basic Commands:"
     echo "  i       Enter insert mode (before current line, enter '.' to end)"
     echo "  I       Insert at beginning of file (enter '.' to end)"
@@ -180,7 +175,7 @@ confirm_exit() {
     return 0
 }
 
-echo "?BAFE Line Editor - Enter 'h' for help"
+echo "?BALE Line Editor - Enter 'h' for help"
 while true; do
     read -p "? " cmd
 
@@ -217,7 +212,7 @@ while true; do
             ;;
         q) 
             if confirm_exit; then 
-                echo "Exiting BAFE. Goodbye!"
+                echo "Exiting BALE. Goodbye!"
                 exit 0
             fi
             ;;
