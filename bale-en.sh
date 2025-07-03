@@ -62,7 +62,7 @@ save_file() {
         echo "?Error: Please specify filename"
         return
     fi
-    local save_name="${1:-$filename}"
+    local save_name="${2:-$filename}"
     printf "%s\n" "${file_content[@]}" > "$save_name"
     echo "File saved to: $save_name"
     filename="$save_name"
@@ -212,8 +212,8 @@ while true; do
             ;;
         q) 
             if confirm_exit; then 
-                echo "Exiting BALE. Goodbye!"
-                exit 0
+                echo "Exiting BALE. Goodbye!If not exit, please enter !exit 0"
+                return 0
             fi
             ;;
         Q) echo "Force quitting"; exit 0 ;;

@@ -58,16 +58,18 @@ print_all() {
 }
 
 save_file() {
-    if [[ -z "$1" && -z "$filename" ]]; then
+    if [[ -z "$filename" ]]; then
         echo "?错误：请指定文件名"
         return
     fi
-    local save_name="${1:-$filename}"
+    local save_name="${2:-$filename}"
     printf "%s\n" "${file_content[@]}" > "$save_name"
     echo "文件已保存至: $save_name"
-    filename="$save_name"
+    filename="$save_name" 
     modified=false
 }
+
+
 
 load_file() {
     if [[ -z "$1" ]]; then
@@ -212,7 +214,7 @@ while true; do
             ;;
         q) 
             if confirm_exit; then 
-                echo "退出 BALE。再见！"
+                echo "退出 BALE。再见！如果没有退出，请输入!exit 0"
                 return 0
             fi
             ;;
