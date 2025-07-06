@@ -1,5 +1,9 @@
 #!/bin/bash
-echo ' ____       _      _       _____                                       | __ )     / \    | |     | ____|                                      |  _ \    / _ \   | |     |  _|                                        | |_) |  / ___ \  | |___  | |___                                       |____/  /_/   \_\ |_____| |_____|
+echo ' ____       _      _       _____
+| __ )     / \    | |     | ____|
+|  _ \    / _ \   | |     |  _|
+| |_) |  / ___ \  | |___  | |___
+|____/  /_/   \_\ |_____| |_____|
 '
 
 file_content=()
@@ -13,7 +17,7 @@ if [ $# -ge 1 ]; then
     if [ -f "$1" ]; then
         filename="$1"
         mapfile -t file_content < "$1"
-        echo "File loaded: $1 (${#file_content[@]} lines)"
+        echo "File loaded: $1 (total ${#file_content[@]} lines)"
     else
         filename="$1"
         echo "New file: $1"
@@ -23,24 +27,25 @@ fi
 show_help() {
     echo "?BALE Line Editor - Help Manual"
     echo " Basic Commands:"
-    echo "  i       Enter insert mode (before current line, enter '.' to end)"
-    echo "  I       Insert at beginning of file (enter '.' to end)"
-    echo "  a       Append after current position (enter '.' to end)"
-    echo "  A       Append at end of file (enter '.' to end)"
+    echo "  i       Enter insert mode (insert before current line, end with '.')"
+    echo "  I       Insert at the beginning of the file (end with '.')"
+    echo "  a       Append after current position (end with '.')"
+    echo "  A       Append at the end of the file (end with '.')"
     echo "  p       Print current line"
     echo "  P       Print all lines (with line numbers)"
-    echo "  n       Show total line count"
+    echo "  n       Show total number of lines"
     echo "  d       Delete current line"
     echo "  D       Delete all lines"
     echo "  w [file] Save file"
     echo "  l [file] Load file"
-    echo "  /pattern Search content"
+    echo "  /pattern    Search content"
     echo "  N       Jump to next match"
-    echo "  g line  Go to specified line"
+    echo "  g line  Jump to specified line"
     echo "  q       Quit editor (confirm unsaved changes)"
     echo "  Q       Force quit without saving"
-    echo "  h       Show this help"
-    echo "  !cmd    Execute shell command"
+    echo "  h       Show help"
+    echo "  !command   Execute shell command"
+    echo "  s       Directly call sed"
 }
 
 print_line() {
@@ -58,20 +63,20 @@ print_all() {
 }
 
 save_file() {
-    if [[ -z "$1" && -z "$filename" ]]; then
-        echo "?Error: Please specify filename"
+    if [[ -z "$filename" ]]; then
+        echo "?Error: Please specify a filename"
         return
     fi
     local save_name="${2:-$filename}"
     printf "%s\n" "${file_content[@]}" > "$save_name"
     echo "File saved to: $save_name"
-    filename="$save_name"
+    filename="$save_name" 
     modified=false
 }
 
 load_file() {
     if [[ -z "$1" ]]; then
-        echo "?Error: Please specify filename"
+        echo "?Error: Please specify a filename"
         return
     fi
     if [[ ! -f "$1" ]]; then
@@ -79,19 +84,19 @@ load_file() {
         return
     fi
     if $modified; then
-        read -p "Current content not saved, load new file? (y/n) " confirm
+        read -p "Current content is unsaved, are you sure to load a new file? (y/n) " confirm
         [[ "$confirm" != "y" ]] && return
-    fi
+    fi #91
     mapfile -t file_content < "$1"
     current_line=0
-    echo "File loaded: $1 (${#file_content[@]} lines)"
+    echo "File loaded: $1 (total ${#file_content[@]} lines)"
     filename="$1"
     modified=false
 }
 
 search_text() {
     if [[ -z "$1" ]]; then
-        echo "?Error: Please enter search pattern"
+        echo "?Error: Please enter a search keyword"
         return
     fi
     search_results=()
@@ -118,7 +123,7 @@ next_match() {
     ((search_index++))
     if (( search_index >= ${#search_results[@]} )); then
         search_index=0
-        echo "?Back to first match"
+        echo "?Back to the first match"
     fi
     current_line="${search_results[$search_index]}"
     print_line
@@ -126,7 +131,7 @@ next_match() {
 
 insert_mode() {
     local insert_at=$1
-    echo "Insert mode (enter '.' to finish):"
+    echo "Insert mode (end with '.'): "
     local insert_lines=()
     while true; do
         read -r input
@@ -142,7 +147,7 @@ insert_mode() {
 
 append_mode() {
     local append_at=$1
-    echo "Append mode (enter '.' to finish):"
+    echo "Append mode (end with '.'): "
     local append_lines=()
     while true; do
         read -r input
@@ -169,13 +174,37 @@ execute_shell() {
 
 confirm_exit() {
     if $modified; then
-        read -p "Unsaved changes, confirm quit? (y/n) " confirm
+        read -p "There are unsaved changes, are you sure to exit? (y/n) " confirm
         [[ "$confirm" != "y" ]] && return 1
     fi
     return 0
 }
+replace_text() {
+    if [[ -z "$1" ]]; then
+        echo "?Error: Please provide a sed command"
+        return
+    fi
+    if [[ "$1" == *"--help"* ]]; then
+        sed --help
+        return
+    fi
+    if (( current_line >= 0 && current_line < ${#file_content[@]} )); then
+        local old_line="${file_content[$current_line]}"
+        local new_line=$(echo "$old_line" | sed "$1")
+        if [[ "$old_line" != "$new_line" ]]; then
+            file_content[$current_line]="$new_line"
+            modified=true
+            echo "Line processed:"
+            print_line
+        else
+            echo "?No changes made, sed command had no effect"
+        fi
+    else
+        echo "?Error: Invalid line number"
+    fi
+}
 
-echo "?BALE Line Editor - Enter 'h' for help"
+echo "?BALE Line Editor - Type 'h' for help"
 while true; do
     read -p "? " cmd
 
@@ -212,11 +241,11 @@ while true; do
             ;;
         q) 
             if confirm_exit; then 
-                echo "Exiting BALE. Goodbye!If not exit, please enter !exit 0"
+                echo "Exiting BALE. Good bye! If not exited, type !exit 0"
                 return 0
             fi
             ;;
-        Q) echo "Force quitting"; exit 0 ;;
+        Q) echo "Force quitting"; return 0;;
         h) show_help ;;
         !*) execute_shell "${cmd#!}" ;;
         [0-9]*) 
@@ -224,10 +253,11 @@ while true; do
             if (( new_line >= 0 && new_line < ${#file_content[@]} )); then
                 current_line=$new_line
                 print_line
-            else
-                echo "?Error: Line number out of range"
+                else
+                echo "?Error:Line number is out of range."
             fi
             ;;
-        *) echo "?Error: Unknown command (enter 'h' for help)" ;;
+        s*) replace_text "${cmd#s}" ;;
+        *) echo "?Error:Unknown command (Enter 'h' to view help.)" ;;
     esac
 done

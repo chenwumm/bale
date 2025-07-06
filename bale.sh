@@ -1,5 +1,9 @@
 #!/bin/bash
-echo ' ____       _      _       _____                                       | __ )     / \    | |     | ____|                                      |  _ \    / _ \   | |     |  _|                                        | |_) |  / ___ \  | |___  | |___                                       |____/  /_/   \_\ |_____| |_____|
+echo ' ____       _      _       _____
+| __ )     / \    | |     | ____|
+|  _ \    / _ \   | |     |  _|
+| |_) |  / ___ \  | |___  | |___
+|____/  /_/   \_\ |_____| |_____|
 '
 
 file_content=()
@@ -41,6 +45,7 @@ show_help() {
     echo "  Q       强制退出不保存"
     echo "  h       显示帮助"
     echo "  !命令   执行shell命令"
+    echo "  s       直接调用sed"
 }
 
 print_line() {
@@ -83,7 +88,7 @@ load_file() {
     if $modified; then
         read -p "当前内容未保存，确定加载新文件吗？(y/n) " confirm
         [[ "$confirm" != "y" ]] && return
-    fi
+    fi #91
     mapfile -t file_content < "$1"
     current_line=0
     echo "已加载文件: $1 (共 ${#file_content[@]} 行)"
@@ -176,6 +181,31 @@ confirm_exit() {
     fi
     return 0
 }
+replace_text() {
+    if [[ -z "$1" ]]; then
+        echo "?错误：请提供 sed 命令"
+        return
+    fi
+    if [[ "$1" == *"--help"* ]]; then
+        sed --help
+        return
+    fi
+    if (( current_line >= 0 && current_line < ${#file_content[@]} )); then
+        local old_line="${file_content[$current_line]}"
+        local new_line=$(echo "$old_line" | sed "$1")
+        if [[ "$old_line" != "$new_line" ]]; then
+            file_content[$current_line]="$new_line"
+            modified=true
+            echo "行已处理："
+            print_line
+        else
+            echo "?未进行更改，sed 命令未产生效果"
+        fi
+    else
+        echo "?错误：无效行号"
+    fi
+}
+
 
 echo "?BALE 行编辑器 - 输入 'h' 获取帮助"
 while true; do
@@ -230,6 +260,7 @@ while true; do
                 echo "?错误：行号超出范围"
             fi
             ;;
+        s*) replace_text "${cmd#s}" ;;
         *) echo "?错误：未知命令（输入 'h' 查看帮助）" ;;
     esac
 done
