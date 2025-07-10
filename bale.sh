@@ -36,7 +36,7 @@ show_help() {
     echo "  n       显示总行数"
     echo "  d       删除当前行"
     echo "  D       删除所有行"
-    echo "  w [文件] 保存文件"
+    echo "  w [文件] 保存文件，如果不指定文件名将会保存到本目录下的w文件。"
     echo "  l [文件] 加载文件"
     echo "  /模式    搜索内容"
     echo "  N       跳转到下一个匹配项"
@@ -63,14 +63,14 @@ print_all() {
 }
 
 save_file() {
-    if [[ -z "$filename" ]]; then
+    local save_name="${1:-$filename}"
+    if [[ -z "$save_name" ]]; then
         echo "?错误：请指定文件名"
         return
     fi
-    local save_name="${2:-$filename}"
     printf "%s\n" "${file_content[@]}" > "$save_name"
     echo "文件已保存至: $save_name"
-    filename="$save_name" 
+    filename="$save_name"
     modified=false
 }
 
@@ -205,7 +205,9 @@ replace_text() {
         echo "?错误：无效行号"
     fi
 }
-
+wnqnld(){
+    echo -e "自然赠与你 树冠 微风 肩头 的暴雨\n片刻后生成 忠诚 永恒 不息 的身体\n---山雀"
+}
 
 echo "?BALE 行编辑器 - 输入 'h' 获取帮助"
 while true; do

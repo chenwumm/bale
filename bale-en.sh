@@ -36,7 +36,7 @@ show_help() {
     echo "  n       Show total number of lines"
     echo "  d       Delete current line"
     echo "  D       Delete all lines"
-    echo "  w [file] Save file"
+    echo "  w [file] Save file,If you don't specify a file name, it will be saved to the w file in this directory."
     echo "  l [file] Load file"
     echo "  /pattern    Search content"
     echo "  N       Jump to next match"
@@ -67,7 +67,7 @@ save_file() {
         echo "?Error: Please specify a filename"
         return
     fi
-    local save_name="${2:-$filename}"
+    local save_name="${1:-$filename}"
     printf "%s\n" "${file_content[@]}" > "$save_name"
     echo "File saved to: $save_name"
     filename="$save_name" 
@@ -202,6 +202,9 @@ replace_text() {
     else
         echo "?Error: Invalid line number"
     fi
+}
+wnqnld(){
+    echo -e "自然赠与你 树冠 微风 肩头 的暴雨\n片刻后生成 忠诚 永恒 不息 的身体\n---山雀"
 }
 
 echo "?BALE Line Editor - Type 'h' for help"
