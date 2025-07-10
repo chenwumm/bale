@@ -47,7 +47,7 @@ bash ~/bale/bale.sh
 bash ~/bale/bale-en.sh
 ```
 
-使用帮助
+## 使用帮助
 
 ? BALE 行编辑器 - 帮助手册
 
